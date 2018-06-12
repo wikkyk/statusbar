@@ -1,0 +1,51 @@
+A configurable status bar for dwm and similar window managers.
+Written by Wiktor Kerr. https://git.memleek.org/statusbar
+
+CONFIGURATION
+
+To configure, edit config.h. Modules take one string parameter each. There is
+no limit to the number of module instances. Every tick, each module is called
+in order and the result is written to the root window. Dwm shows this string
+in its status bar. Ticks are spaced out by a time period specified in the
+config file.
+The included config file is an example that works on my ThinkPad.
+
+There are a few modules available:
+- baticon: takes a directory that describes your battery (usually
+  /sys/class/power_supply/BAT0) and outputs a glyph that represents the charge
+  level. Only tested with Leggie <https://memleek.org/leggie>.
+- batperc: like above, but outputs the charge level as a percentage.
+- battime: like above, but tries to estimate how much time you have left until
+  your battery is discharged (or until fully charged if charging).
+- datetime: takes a strftime string and outputs formatted localtime.
+- file: takes a file name and outputs the contents of that file.
+- str: outputs a string.
+- trun: removes a number of bytes from output.
+
+BUILDING
+
+Once configured, run make. A statically linked binary called 'statusbar' will
+be produced.
+
+HACKING
+
+To make a new module, create a new file and add its name (without extension) to
+the Makefile. Your module needs to export a struct Module filled out as
+follows:
+
+- the init function initialises your module. It is called every time the module
+  is instantiated. The char * parameter is the parameter from the config file.
+  The return value is a pointer to whatever you need to keep for the tick
+  function to recognise this instance.
+- the tick function is called roughly every 'refresh' milliseconds as in the
+  config file. The char * parameter is a pointer to the buffer where you can
+  write your output, the size_t is the remaining size. The void * is the
+  pointer returned from init. The msec is the delay since the last call (more
+  or less, the main loop tries to account for scheduling delays but does not
+  go out of its way to ensure accurate timings). The return value is the number
+  of bytes output to the buffer, with the exception of the final NUL (which is
+  optional).
+- the name parameter is the name of your module. Please set it to the file name
+  without extension.
+
+Look at the str module for a simple example.
